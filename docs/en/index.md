@@ -68,11 +68,11 @@ Seq's ingestion paths cut off — is documented with the rest of Cloche, in
 5. **Applications cannot reach each other.** Each `<app>_edge` network joins Caddy to one
    application only; only Caddy is on more than one.
 
-Caddy's attachment to `cloche_edge` carries the alias `auth.${CLOCHE_DOMAIN}`. When Cloche's `api` or
-`billing` resolves `auth.<domain>` to fetch Zitadel's JWKS, it gets Caddy's container address, so the
-call goes through the same TLS and routing as a browser's but never leaves the host. The stack does
-not depend on the provider supporting hairpin NAT. Remove the alias if Zitadel ever moves to another
-machine.
+Caddy's attachments to `cloche_edge` and `ledger_edge` both carry the alias `auth.${CLOCHE_DOMAIN}`:
+Ledger signs in through Cloche's Zitadel too. When Cloche's `api` or `billing`, or Ledger's `api`,
+resolves `auth.<domain>` to fetch Zitadel's JWKS, it gets Caddy's container address, so the call goes
+through the same TLS and routing as a browser's but never leaves the host. Neither stack depends on
+the provider supporting hairpin NAT. Remove the aliases if Zitadel ever moves to another machine.
 
 ### Applications on this proxy
 
@@ -81,13 +81,12 @@ machine.
 | Cloche | `sites/cloche.caddy` | `cloche_edge` | `{$CLOCHE_DOMAIN}`, `app.`, `auth.`, `logs.` | `cloche-web`, `cloche-zitadel`, `cloche-zitadel-login`, `cloche-seq` |
 | Ledger | `sites/ledger.caddy` | `ledger_edge` | `{$LEDGER_DOMAIN}`, `app.` | `ledger-web` |
 
-Ledger is laid out like Cloche without identity and logs: one nginx container, `web`, serves the
-landing page on the bare domain and the SPA with its `/api` proxy on `app.`, telling them apart by
-`Host`. Its compose file owes this proxy exactly what Cloche's does — the external network
-`ledger_edge`, created by its deploy script if missing, and the alias `ledger-web` on `web` — and
-nothing else: with no `auth.` name to resolve, its API stays off `ledger_edge`. Until that stack
-runs, Caddy answers `502` on Ledger's names; the certificates are issued as soon as their DNS
-records point here.
+Ledger is laid out like Cloche without its own identity provider and logs: one nginx container,
+`web`, serves the SPA with its `/api` proxy on every host name. Its compose file owes this proxy the
+external network `ledger_edge`, created by its deploy script if missing, the alias `ledger-web` on
+`web`, and its `api` on `ledger_edge` without an alias, only to resolve `auth.${CLOCHE_DOMAIN}` to
+Caddy. Until that stack runs, Caddy answers `502` on Ledger's names; the certificates are issued as
+soon as their DNS records point here.
 
 ---
 

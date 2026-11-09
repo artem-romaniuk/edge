@@ -31,7 +31,8 @@ cp .env.example .env && chmod 600 .env   # ACME_EMAIL and each application's dom
             cloche_edge                                         ledger_edge
                  │                                                   │
    cloche-web · cloche-zitadel · cloche-zitadel-login · cloche-seq   ledger-web
-   api, billing ── resolve auth.<CLOCHE_DOMAIN> to caddy through a network alias
+   api, billing ── resolve auth.<CLOCHE_DOMAIN>                      api ── resolves auth.<CLOCHE_DOMAIN>
+                   to caddy through a network alias                         to caddy the same way
 ```
 
 ## Documentation

@@ -27,6 +27,8 @@ services:
         aliases:
           - auth.${CLOCHE_DOMAIN}
       ledger:
+        aliases:
+          - auth.${CLOCHE_DOMAIN}
 
 networks:
   cloche:
