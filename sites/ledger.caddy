@@ -1,0 +1,4 @@
+{$LEDGER_DOMAIN}, app.{$LEDGER_DOMAIN} {
+	import access_log
+	reverse_proxy ledger-web:80
+}
