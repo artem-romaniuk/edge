@@ -16,6 +16,7 @@ services:
     environment:
       ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in edge/.env}
       CLOCHE_DOMAIN: ${CLOCHE_DOMAIN:?set CLOCHE_DOMAIN in edge/.env}
+      LEDGER_DOMAIN: ${LEDGER_DOMAIN:?set LEDGER_DOMAIN in edge/.env}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - ./sites:/etc/caddy/sites:ro
@@ -25,11 +26,15 @@ services:
       cloche:
         aliases:
           - auth.${CLOCHE_DOMAIN}
+      ledger:
 
 networks:
   cloche:
     external: true
     name: cloche_edge
+  ledger:
+    external: true
+    name: ledger_edge
 
 volumes:
   caddy_data:

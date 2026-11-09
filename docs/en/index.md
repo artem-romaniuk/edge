@@ -74,6 +74,21 @@ call goes through the same TLS and routing as a browser's but never leaves the h
 not depend on the provider supporting hairpin NAT. Remove the alias if Zitadel ever moves to another
 machine.
 
+### Applications on this proxy
+
+| Application | Site file | Network | Host names | Upstreams |
+|-------------|-----------|---------|------------|-----------|
+| Cloche | `sites/cloche.caddy` | `cloche_edge` | `{$CLOCHE_DOMAIN}`, `app.`, `auth.`, `logs.` | `cloche-web`, `cloche-zitadel`, `cloche-zitadel-login`, `cloche-seq` |
+| Ledger | `sites/ledger.caddy` | `ledger_edge` | `{$LEDGER_DOMAIN}`, `app.` | `ledger-web` |
+
+Ledger is laid out like Cloche without identity and logs: one nginx container, `web`, serves the
+landing page on the bare domain and the SPA with its `/api` proxy on `app.`, telling them apart by
+`Host`. Its compose file owes this proxy exactly what Cloche's does — the external network
+`ledger_edge`, created by its deploy script if missing, and the alias `ledger-web` on `web` — and
+nothing else: with no `auth.` name to resolve, its API stays off `ledger_edge`. Until that stack
+runs, Caddy answers `502` on Ledger's names; the certificates are issued as soon as their DNS
+records point here.
+
 ---
 
 ## 4. `.env`
@@ -82,6 +97,7 @@ machine.
 |----------|--|--|
 | `ACME_EMAIL` | required | The Let's Encrypt account address: expiry warnings and account notices go there |
 | `CLOCHE_DOMAIN` | required | Cloche's registered domain. **Must equal `DOMAIN` in `deploy/.env`** — Cloche builds its URLs, CORS origins and Zitadel issuer from that one, and Caddy serves this one |
+| `LEDGER_DOMAIN` | required | Ledger's registered domain, `ledgercloud.bid`. Must equal the domain Ledger's own deploy is configured with |
 
 `chmod 600 .env`. It holds no secrets today, but it is gitignored like every other `.env`.
 
@@ -178,6 +194,9 @@ only when the request's host is Cloche's `DOMAIN` or one of its subdomains, so o
 traffic never enters Cloche's Seq. Caddy's other lines — certificate issuance, renewals, errors —
 are shipped whole, for every domain. See Cloche's
 [Logs](../../../deploy/docs/en/07-operations/index.md#4-logs).
+
+Ledger has no log server of its own: its requests are in this Caddy's access log, read with
+`docker compose logs caddy` here.
 
 ---
 

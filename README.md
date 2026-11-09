@@ -16,7 +16,8 @@ cp .env.example .env && chmod 600 .env   # ACME_EMAIL and each application's dom
 | `docker-compose.yml` | The `caddy` service, its volumes and one external network per application |
 | `Caddyfile` | The global block, the `(access_log)` snippet and `import sites/*.caddy` |
 | `sites/cloche.caddy` | Cloche's host names and routes |
-| `.env.example` | `ACME_EMAIL` and `CLOCHE_DOMAIN` |
+| `sites/ledger.caddy` | Ledger's host names (`ledgercloud.bid`, `app.`) and routes |
+| `.env.example` | `ACME_EMAIL`, `CLOCHE_DOMAIN` and `LEDGER_DOMAIN` |
 | `scripts/up.sh` | Creates missing networks, pulls, starts, validates and reloads Caddy |
 
 ## What runs
@@ -27,9 +28,9 @@ cp .env.example .env && chmod 600 .env   # ACME_EMAIL and each application's dom
                            caddy (project edge) ── TLS (Let's Encrypt), HTTP→HTTPS
                                   │
                  ┌────────────────┴──────────── one external network per application
-            cloche_edge                                         <app>_edge
+            cloche_edge                                         ledger_edge
                  │                                                   │
-   cloche-web · cloche-zitadel · cloche-zitadel-login · cloche-seq   <app>-web ...
+   cloche-web · cloche-zitadel · cloche-zitadel-login · cloche-seq   ledger-web
    api, billing ── resolve auth.<CLOCHE_DOMAIN> to caddy through a network alias
 ```
 
