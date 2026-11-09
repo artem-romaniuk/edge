@@ -1,0 +1,36 @@
+{$CLOCHE_DOMAIN}, app.{$CLOCHE_DOMAIN} {
+	import access_log
+	reverse_proxy cloche-web:80
+}
+
+auth.{$CLOCHE_DOMAIN} {
+	import access_log
+	encode zstd gzip
+
+	@root path /
+	handle @root {
+		rewrite * /ui/v2/login/
+		reverse_proxy cloche-zitadel-login:3000
+	}
+
+	handle /ui/v2/login* {
+		reverse_proxy cloche-zitadel-login:3000
+	}
+
+	handle_path /api/* {
+		reverse_proxy h2c://cloche-zitadel:8080
+	}
+
+	handle {
+		reverse_proxy h2c://cloche-zitadel:8080
+	}
+}
+
+logs.{$CLOCHE_DOMAIN} {
+	encode zstd gzip
+
+	@ingest path /api/events/raw* /ingest/*
+	respond @ingest 404
+
+	reverse_proxy cloche-seq:80
+}

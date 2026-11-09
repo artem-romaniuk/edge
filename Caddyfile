@@ -1,0 +1,12 @@
+{
+	email {$ACME_EMAIL}
+}
+
+(access_log) {
+	log {
+		output stderr
+		format json
+	}
+}
+
+import sites/*.caddy
